@@ -12,16 +12,41 @@ provider "aws" {
     profile = "gachio"
 }
 
+
+
+resource "aws_key_pair" "ack-key-pair" {
+    key_name   = "ack-key-pair"
+    public_key = tls_private_key.rsa.public_key_openssh
+}
+
+resource "tls_private_key" "rsa" {
+    algorithm = "RSA"
+    rsa_bits  = 4096
+}
+
+resource "local_file" "ack-key" {
+    content  = tls_private_key.rsa.private_key_pem
+    filename = "ack-key-pair"
+}
+
 resource "aws_instance" "ack-env" {
     ami = "ami-09dd2e08d601bff67"
     instance_type = "t2.micro"
+    key_name = "ack-key-pair"
+    vpc_security_group_ids = [aws_security_group.ack-env-wall.id]
     
     tags = {
         Name = "ack-org"
     }
 }
 
-resource "aws_key_pair" "ack-deploy" {
-  key_name   = "ack-key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 sekoudst@gmail.com"
+resource "aws_security_group" "ack-env-wall" {
+    name = "our-wall"
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
 }
