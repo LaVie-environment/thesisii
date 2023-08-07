@@ -9,6 +9,7 @@ terraform {
 
 provider "aws" {
     region = "us-west-2"
+    profile = "gachio"
 }
 
 resource "aws_instance" "ack-env" {
