@@ -3,3 +3,6 @@ terraform.tfstate
 terraform.tfstate.backup
 *.tfstate
 *.tfstate.backup
+act_key.pub
+variables.tf
+demokeypair.pem
